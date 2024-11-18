@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="container mx-auto py-8">
+    <div class="mx-auto py-8" style="width: 80%">
         <!-- Flash Message -->
         @if (session('success'))
             <div class="bg-green-400 text-white p-2 rounded-md mb-4">
@@ -40,7 +40,7 @@
                                 <td class="px-4 py-2 border">{{ Str::limit($post->content, 50) }}</td>
                                 <td class="px-4 py-2 border">
                                     @if ($post->image)
-                                        <img src="{{ asset('storage/'.$post->image) }}" alt="{{ $post->title }}"
+                                        <img src="{{ asset($post->image) }}" alt="{{ $post->title }}"
                                             width="100">
                                     @else
                                         <em>No Image</em>

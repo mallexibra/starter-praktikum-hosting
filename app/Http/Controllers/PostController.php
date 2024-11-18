@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -28,7 +29,11 @@ class PostController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->storeAs('images', 'public');
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $fileName = uniqid() . '.' . $extension;
+            $image->move(public_path('images'), $fileName);
+            $imagePath = 'images/' . $fileName;
         }
 
         Post::create([
@@ -54,11 +59,16 @@ class PostController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            if ($post->image) {
-                Storage::disk('public')->delete($post->image);
+            if ($post->image && File::exists(public_path($post->image))) {
+                unlink(public_path($post->image));
             }
-            $imagePath = $request->file('image')->store('images', 'public');
-            $post->image = $imagePath;
+
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $fileName = uniqid() . '.' . $extension;
+            $image->move(public_path('images'), $fileName);
+
+            $post->image = 'images/' . $fileName;
         }
 
         $post->update([
@@ -71,9 +81,10 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        if ($post->image) {
-            Storage::disk('public')->delete($post->image);
+        if ($post->image && File::exists(public_path($post->image))) {
+            unlink(public_path($post->image));
         }
+
         $post->delete();
 
         return redirect()->route('posts.index')->with('success', 'Post deleted successfully!');
